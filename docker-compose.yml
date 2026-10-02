@@ -1,0 +1,13 @@
+version: '3.8'
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: ibva_postgres
+    environment:
+      POSTGRES_DB: ibva_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ibva_password
+    ports: ["5432:5432"]
+    volumes: [ibva_pgdata:/var/lib/postgresql/data]
+volumes:
+  ibva_pgdata:

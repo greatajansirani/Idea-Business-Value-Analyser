@@ -1,0 +1,148 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      Role     @default(ANALYST)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ideas        Idea[]
+  chatMessages ChatMessage[]
+  auditLogs    AuditLog[]
+}
+
+enum Role { ADMIN ANALYST SME VIEWER }
+
+model Idea {
+  id              String     @id @default(uuid())
+  title           String
+  category        Category
+  description     String     @db.Text
+  targetMarket    String?
+  investmentCost  Float
+  expectedBenefit Float
+  paybackTimeline String?
+  riskLevel       RiskLevel  @default(MEDIUM)
+  userExpectation String?    @db.Text
+  status          IdeaStatus @default(DRAFT)
+  version         Int        @default(1)
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+  userId          String
+  user            User       @relation(fields: [userId], references: [id])
+  roiAnalysis     RoiAnalysis?
+  scenarios       Scenario[]
+  reports         Report[]
+  chatMessages    ChatMessage[]
+  auditLogs       AuditLog[]
+}
+
+enum Category {
+  AI_ML ENERGY_SUSTAINABILITY INFRASTRUCTURE_TECH
+  DATA_ANALYTICS PROCESS_AUTOMATION DIGITAL_TRANSFORMATION OTHER
+}
+enum RiskLevel  { LOW MEDIUM HIGH }
+enum IdeaStatus { DRAFT UNDER_REVIEW APPROVED REJECTED FINALIZED }
+
+model RoiAnalysis {
+  id                 String   @id @default(uuid())
+  ideaId             String   @unique
+  idea               Idea     @relation(fields: [ideaId], references: [id], onDelete: Cascade)
+  initialInvestment  Float
+  annualCashFlows    Json
+  discountRate       Float
+  projectLifeYears   Int
+  capex              Float
+  opex               Float
+  maintenanceCost    Float
+  developmentCost    Float
+  revenueGeneration  Float
+  efficiencyGains    Float
+  costSavings        Float
+  roiRatio           Float
+  npv                Float
+  irr                Float
+  paybackPeriodYears Float
+  bcr                Float
+  breakEvenYear      Float
+  grossMargin        Float
+  netProfitMargin    Float
+  shortTermRevenue   Float
+  longTermRevenue    Float
+  riskScore          Float
+  riskMarket         Float    @default(0)
+  riskTechnology     Float    @default(0)
+  riskFinancial      Float    @default(0)
+  riskRegulatory     Float    @default(0)
+  goNoGo             GoNoGo
+  aiInsights         String?  @db.Text
+  marketInsights     String?  @db.Text
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
+
+enum GoNoGo { GO NO_GO CONDITIONAL }
+
+model Scenario {
+  id                String       @id @default(uuid())
+  ideaId            String
+  idea              Idea         @relation(fields: [ideaId], references: [id], onDelete: Cascade)
+  type              ScenarioType
+  label             String
+  revenueMultiplier Float
+  costMultiplier    Float
+  riskMultiplier    Float
+  roi               Float
+  npv               Float
+  irr               Float
+  payback           Float
+  totalCost         Float
+  totalBenefit      Float
+  createdAt         DateTime     @default(now())
+}
+
+enum ScenarioType { BEST_CASE WORST_CASE MOST_LIKELY }
+
+model Report {
+  id          String       @id @default(uuid())
+  ideaId      String
+  idea        Idea         @relation(fields: [ideaId], references: [id], onDelete: Cascade)
+  format      ReportFormat
+  generatedAt DateTime     @default(now())
+}
+
+enum ReportFormat { PDF DOCX PPTX XLSX JSON }
+
+model ChatMessage {
+  id        String   @id @default(uuid())
+  ideaId    String
+  idea      Idea     @relation(fields: [ideaId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  role      ChatRole
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+}
+
+enum ChatRole { USER ASSISTANT }
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  ideaId    String
+  idea      Idea     @relation(fields: [ideaId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  action    String
+  details   Json?
+  version   Int
+  createdAt DateTime @default(now())
+}
