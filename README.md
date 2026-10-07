@@ -1,35 +1,7 @@
 # IdeaBVA — Idea Business Value Analyzer
 ### Larsen & Toubro | Digital Energy Solutions | MVP-1
 
----
-
-## CRITICAL FIXES IN THIS VERSION
-
-### Fix 1 — Investment Calculation Bug (CRITICAL)
-**Bug:** System was using `idea.investmentCost` (rough estimate from idea form) as the
-base for ALL financial calculations. This caused 13x errors in payback, ROI, IRR, NPV.
-
-**Fix:** `initialInvestment = CAPEX + Development Cost` (from detailed ROI page inputs).
-The idea form's "Investment Cost" is just an initial rough estimate — never used in formulas.
-
-Before fix: idea.investmentCost=1,00,000 → payback=1 month, ROI=4000%, IRR=899%
-After fix:  capex+devCost=13,62,233 → payback=20 months, ROI=156%, IRR=55%  ← CORRECT
-
-### Fix 2 — Risk Score Always Showing Same % for All Components
-**Bug:** Frontend derived each component as (composite * weight / weight) = same number.
-e.g. composite=22% → market=22*0.30/30*100=22%, tech=22*0.25/25*100=22% — identical!
-
-**Fix:** Financial engine now returns 4 INDEPENDENT scores stored in DB:
-  riskMarket, riskTechnology, riskFinancial, riskRegulatory
-Each scored 0-100 based on different idea-specific factors.
-Result: Market=7%, Technology=12%, Financial=1%, Regulatory=35% — all different.
-
-### Fix 3 — Go/No-Go Too Lenient (Every Project Was GO)
-Raised thresholds: ROI>20% (was 15%), IRR>12% (was 10%), payback<55% life (was 60%), risk<50% (was 60%)
-
-### Fix 4 — New Charts Added
-- Project Efficiency Score (gauge chart showing return per rupee)
-- Financial Insights panel (5 criteria with PASS/FAIL signals)
+ 
 
 ---
 
